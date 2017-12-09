@@ -56,6 +56,8 @@ QUEUE=80
 DELAY="1.0ms"
 LOSS="2.0%"
 
+echo "SETUP TRAFFIC CONTROL"
+
 for DEVICE in $f1t2 $f2t1 $f2t3 $f3t2
 do
     tc qdisc add dev "$DEVICE" root handle 1: tbf rate "${RATE}" burst 1536b limit "$(($QUEUE*1536))"
@@ -81,7 +83,7 @@ do
     ip link set $ihost netns ns$i
     echo "In netns ns$i"
     ip netns exec ns$i ifconfig $ihost 10.255.255.${i}/24
-    ip netns exec ns$i ip link $ihost up
+    ip netns exec ns$i ip link set $ihost up
     ip netns exec ns$i ifconfig
     ovs-vsctl add-port $br $ibr
 done
