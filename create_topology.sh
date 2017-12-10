@@ -1,5 +1,14 @@
 #!/usr/bin/env bash
 
+function traffic_control {
+    for DEVICE in $1 $2
+    do
+        tc qdisc add dev "$DEVICE" root handle 1: tbf rate "${RATE}" burst 1536b limit "$(($QUEUE*1536))"
+        tc qdisc add dev "$DEVICE" parent 1:1 handle 10: netem delay "${DELAY}" loss random "${LOSS}"
+        tc qdisc show dev "$DEVICE"
+    done
+}
+
 # create ovs
 br1=br1
 br2=br2
@@ -51,17 +60,16 @@ ovs-vsctl add-port br3 $f3t2
 
 ovs-vsctl show
 
-RATE=25mbit
-QUEUE=80
-DELAY="1.0ms"
-LOSS="2.0%"
+echo "SETUP TRAFFIC CONTROL br1<->br2"
 
-echo "SETUP TRAFFIC CONTROL"
+RATE="1.8gbit" QUEUE=1300 DELAY="140ms" LOSS="0.003%" traffic_control $f1t2 $f2t1
+RATE="25mbit" QUEUE=80 DELAY="1.0ms" LOSS="2.0%" traffic_control $f2t3 $f3t2
 
 for DEVICE in $f1t2 $f2t1 $f2t3 $f3t2
 do
     tc qdisc add dev "$DEVICE" root handle 1: tbf rate "${RATE}" burst 1536b limit "$(($QUEUE*1536))"
     tc qdisc add dev "$DEVICE" parent 1:1 handle 10: netem delay "${DELAY}" loss random "${LOSS}"
+    tc qdisc show dev "$DEVICE"
 done
 
 
@@ -89,3 +97,5 @@ do
 done
 
 ovs-vsctl show
+
+echo "Topology was built. Cleanup file configureted - $cleanfile"
