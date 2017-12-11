@@ -61,8 +61,8 @@ ovs-vsctl add-port br3 $f3t2
 
 ovs-vsctl show
 
-# RATE="1.8gbit" QUEUE=1300 DELAY="140ms" LOSS="0.003%" traffic_control $f1t2 $f2t1
-# RATE="25mbit" QUEUE=80 DELAY="1.0ms" LOSS="2.0%" traffic_control $f2t3 $f3t2
+RATE="1.8gbit" QUEUE=1300 DELAY="140ms" LOSS="0.003%" traffic_control $f1t2 $f2t1
+RATE="25mbit" QUEUE=80 DELAY="1.0ms" LOSS="2.0%" traffic_control $f2t3 $f3t2
 
 echo "Create virtual pair from host to switch"
 echo "Configure netns"
